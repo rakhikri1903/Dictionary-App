@@ -112,33 +112,22 @@ async function searchWord(word) {
 async function fetchWordData(word) {
     const cleanWord = word.trim().toLowerCase();
 
-    if (!cleanWord) {
-        showError(
-            "Empty search",
-            "Please enter a word to search."
-        );
-        return;
-    }
+    // Dictionary API
+    const apiURL = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`;
 
-    // Official Free Dictionary API
-    const apiURL =
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`;
+    let data;
 
-    console.log("Requesting:", apiURL);
-
+    // ==========================================
+    // STEP 1: FETCH DATA FROM API
+    // ==========================================
     try {
-        showLoading();
+        console.log("Searching:", cleanWord);
+        console.log("API URL:", apiURL);
 
-        const response = await fetch(apiURL, {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        });
+        const response = await fetch(apiURL);
 
         console.log("API Status:", response.status);
 
-        // Word doesn't exist
         if (response.status === 404) {
             showError(
                 "Word not found",
@@ -147,51 +136,65 @@ async function fetchWordData(word) {
             return;
         }
 
-        // Other HTTP errors
         if (!response.ok) {
-            throw new Error(
-                `API request failed with status ${response.status}`
+            showError(
+                "Dictionary API Error",
+                `The dictionary API returned status ${response.status}. Please try again.`
             );
+            return;
         }
 
-        const data = await response.json();
-
-        console.log("API Response:", data);
-
-        // Check response
-        if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("Invalid API response");
-        }
-
-        // Display word information
-        displayWordData(data);
-
-        // Save successful search
-        saveToHistory(cleanWord);
+        data = await response.json();
 
     } catch (error) {
 
-        console.error("Dictionary API Error:", error);
+        console.error("FETCH ERROR:", error);
 
-        // Network / fetch error
-        if (error instanceof TypeError) {
+        showError(
+            "Network connection error",
+            "Unable to connect to the dictionary API. Please check your internet connection and try again."
+        );
 
-            showError(
-                "Network connection error",
-                "Unable to connect to the dictionary API. Please check your internet connection and try again."
-            );
+        return;
+    }
 
-        } else {
+    // ==========================================
+    // STEP 2: CHECK API DATA
+    // ==========================================
+    if (!Array.isArray(data) || data.length === 0) {
+        showError(
+            "No result",
+            "The dictionary did not return any information for this word."
+        );
+        return;
+    }
 
-            showError(
-                "Something went wrong",
-                "Unable to get the meaning of this word. Please try again."
-            );
-        }
+    // ==========================================
+    // STEP 3: DISPLAY RESULT
+    // IMPORTANT: This is OUTSIDE the fetch catch
+    // ==========================================
+    try {
+        displayWordData(data);
+    } catch (error) {
+        console.error("DISPLAY ERROR:", error);
 
-    } finally {
+        showError(
+            "Display error",
+            "The word was found, but there was a problem displaying its information."
+        );
 
-        hideLoading();
+        return;
+    }
+
+    // ==========================================
+    // STEP 4: SAVE SEARCH HISTORY
+    // This should NOT be treated as a network error
+    // ==========================================
+    try {
+        saveToHistory(cleanWord);
+    } catch (error) {
+        console.error("HISTORY ERROR:", error);
+        console.warn("Word was found successfully, but search history could not be saved.");
     }
 }
 
