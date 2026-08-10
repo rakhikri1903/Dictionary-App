@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dictionary - Definitions, Pronunciations & Vocabulary</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main Wrapper to handle flex layout -->
+    <div class="app-wrapper">
+        
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-container">
+                <div class="brand">
+                    <div class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1>My Dictionary</h1>
+                        <p class="subtitle">Discover meanings, pronunciations & examples</p>
+                    </div>
+                </div>
+                <!-- Theme Toggle Switch -->
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+                    <!-- Sun Icon (visible in Dark Mode) -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2"/>
+                        <path d="M12 20v2"/>
+                        <path d="m4.93 4.93 1.41 1.41"/>
+                        <path d="m17.66 17.66 1.41 1.41"/>
+                        <path d="M2 12h2"/>
+                        <path d="M20 12h2"/>
+                        <path d="m6.34 17.66-1.41 1.41"/>
+                        <path d="m19.07 4.93-1.41 1.41"/>
+                    </svg>
+                    <!-- Moon Icon (visible in Light Mode) -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="main-container">
+            
+            <!-- Search & Suggestions Panel -->
+            <section class="search-panel">
+                <form id="search-form" class="search-form">
+                    <div class="search-input-wrapper">
+                        <!-- Search Icon -->
+                        <span class="search-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.3-4.3"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Enter a word..." 
+                            aria-label="Search for a word"
+                            autocomplete="off"
+                            required
+                        >
+                        <!-- Clear Input Button -->
+                        <button type="button" id="clear-btn" class="clear-btn hidden" aria-label="Clear search query" title="Clear">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18"/>
+                                <path d="m6 6 12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="search-submit-btn">
+                        <span>Search</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Suggested Vocabulary -->
+                <div class="suggested-vocab">
+                    <span class="vocab-label">Try searching:</span>
+                    <div class="vocab-tags" id="suggested-tags">
+                        <button type="button" class="vocab-tag">Hello</button>
+                        <button type="button" class="vocab-tag">Beautiful</button>
+                        <button type="button" class="vocab-tag">Knowledge</button>
+                        <button type="button" class="vocab-tag">Success</button>
+                        <button type="button" class="vocab-tag">Programming</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Split (Grid) -->
+            <div class="dashboard-grid">
+                
+                <!-- Left Column: Word Results / Welcome / Loading / Error -->
+                <section class="results-column">
+                    
+                    <!-- Welcome Card (Default View) -->
+                    <div id="welcome-card" class="dashboard-card welcome-card">
+                        <div class="card-art">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m10 15 5-3-5-3v6Z"/>
+                            </svg>
+                        </div>
+                        <h2>Start Exploring</h2>
+                        <p>Type a word above or click one of the suggested tags to find definitions, audio pronunciations, synonyms, and examples.</p>
+                    </div>
+
+                    <!-- Loading State Card -->
+                    <div id="loader" class="dashboard-card loader-card hidden">
+                        <div class="spinner"></div>
+                        <p>🔄 Searching for meaning...</p>
+                    </div>
+
+                    <!-- Error State Card -->
+                    <div id="error-card" class="dashboard-card error-card hidden">
+                        <div class="error-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m15 9-6 6"/>
+                                <path d="m9 9 6 6"/>
+                            </svg>
+                        </div>
+                        <h2 id="error-title">Word not found</h2>
+                        <p id="error-body">Sorry, we couldn't find the meaning of this word. Please check the spelling and try again.</p>
+                    </div>
+
+                    <!-- Dictionary Word Result Card -->
+                    <div id="result-card" class="dashboard-card result-card hidden">
+                        
+                        <!-- Word Header Area -->
+                        <div class="result-header">
+                            <div class="word-meta">
+                                <h2 id="result-word">Word</h2>
+                                <span id="result-phonetic" class="phonetic">/phonetic/</span>
+                            </div>
+                            
+                            <div class="word-actions">
+                                <!-- Audio Pronunciation Button -->
+                                <button id="play-audio-btn" class="action-btn play-btn" aria-label="Play pronunciation">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                    </svg>
+                                    <span>🔊 Play Pronunciation</span>
+                                </button>
+                                
+                                <!-- Favorite Toggle Button -->
+                                <button id="favorite-btn" class="action-btn fav-btn" aria-label="Save word to favorites">
+                                    <svg class="star-outline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                    <svg class="star-filled hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                    <span id="fav-btn-text">Favorite</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Meanings Container -->
+                        <div id="meanings-container" class="meanings-container">
+                            <!-- Injected by script.js -->
+                        </div>
+                        
+                    </div>
+
+                </section>
+
+                <!-- Right Column: Sidebar -->
+                <aside class="sidebar-column">
+                    
+                    <!-- Word of the Day Card -->
+                    <section class="dashboard-card sidebar-card wod-card">
+                        <div class="sidebar-card-header">
+                            <span class="wod-badge">📅 Word of the Day</span>
+                        </div>
+                        <div id="wod-loading" class="wod-content-loader">
+                            <div class="mini-spinner"></div>
+                            <span>Loading...</span>
+                        </div>
+                        <div id="wod-display" class="wod-display hidden">
+                            <h3 id="wod-word" class="wod-word">Word</h3>
+                            <p id="wod-meaning" class="wod-meaning">Meaning details will load here...</p>
+                            <button id="wod-search-btn" class="wod-action-btn">
+                                <span>Search This Word</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"/>
+                                    <path d="m12 5 7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Recent Searches Card -->
+                    <section class="dashboard-card sidebar-card history-card">
+                        <div class="sidebar-card-header">
+                            <h3>⏱️ Recent Searches</h3>
+                        </div>
+                        <ul id="history-list" class="sidebar-list">
+                            <!-- Injected by script.js -->
+                            <li class="empty-list-msg">No recent searches yet.</li>
+                        </ul>
+                    </section>
+
+                    <!-- Favorites Card -->
+                    <section class="dashboard-card sidebar-card favorites-card">
+                        <div class="sidebar-card-header">
+                            <h3>⭐ My Favorites</h3>
+                        </div>
+                        <ul id="favorites-list" class="sidebar-list">
+                            <!-- Injected by script.js -->
+                            <li class="empty-list-msg">No favorite words saved yet.</li>
+                        </ul>
+                    </section>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p>&copy; 2026 My Dictionary App. Powered by free <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Free Dictionary API</a>.</p>
+                <p class="tagline">Built for beginners with HTML5, CSS3, &amp; Vanilla JavaScript.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script src="app.js"></script>
+</body>
+</html>
