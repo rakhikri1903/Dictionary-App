@@ -110,49 +110,88 @@ async function searchWord(word) {
  * @param {string} word - Cleaned word string.
  */
 async function fetchWordData(word) {
-    const apiURL = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+    const cleanWord = word.trim().toLowerCase();
+
+    if (!cleanWord) {
+        showError(
+            "Empty search",
+            "Please enter a word to search."
+        );
+        return;
+    }
+
+    // Official Free Dictionary API
+    const apiURL =
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`;
+
+    console.log("Requesting:", apiURL);
 
     try {
-        const response = await fetch(apiURL);
+        showLoading();
 
-        // Check if the response status is not OK (e.g. 404 word not found)
-        if (!response.ok) {
-            if (response.status === 404) {
-                showError(
-                    "Word not found",
-                    "Sorry, we couldn't find the meaning of this word. Please check the spelling and try again."
-                );
-            } else {
-                showError(
-                    "Server error",
-                    `Something went wrong on the server (Status: ${response.status}). Please try again later.`
-                );
+        const response = await fetch(apiURL, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
             }
+        });
+
+        console.log("API Status:", response.status);
+
+        // Word doesn't exist
+        if (response.status === 404) {
+            showError(
+                "Word not found",
+                `Sorry, we couldn't find "${cleanWord}". Please check the spelling and try again.`
+            );
             return;
         }
 
-        // Parse JSON response data
+        // Other HTTP errors
+        if (!response.ok) {
+            throw new Error(
+                `API request failed with status ${response.status}`
+            );
+        }
+
         const data = await response.json();
 
-        // Verify response contains elements
+        console.log("API Response:", data);
+
+        // Check response
         if (!Array.isArray(data) || data.length === 0) {
-            showError("Unexpected error", "The data received from the server was invalid.");
-            return;
+            throw new Error("Invalid API response");
         }
 
-        // Renders dictionary results to UI
+        // Display word information
         displayWordData(data);
 
-        // Save the successfully searched word to history
-        saveToHistory(word);
+        // Save successful search
+        saveToHistory(cleanWord);
 
     } catch (error) {
-        // Fetch throws an error in case of offline/network connection failures
-        showError(
-            "Network connection error",
-            "Unable to connect to the dictionary. Please check your internet connection and try again."
-        );
-        console.error("Dictionary API Fetch Error:", error);
+
+        console.error("Dictionary API Error:", error);
+
+        // Network / fetch error
+        if (error instanceof TypeError) {
+
+            showError(
+                "Network connection error",
+                "Unable to connect to the dictionary API. Please check your internet connection and try again."
+            );
+
+        } else {
+
+            showError(
+                "Something went wrong",
+                "Unable to get the meaning of this word. Please try again."
+            );
+        }
+
+    } finally {
+
+        hideLoading();
     }
 }
 
