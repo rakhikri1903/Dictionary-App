@@ -1,10 +1,3 @@
-/**
- * DICTIONARY WEB APPLICATION (app.js)
- * 
- * A beginner-friendly, clean, and fully-featured JavaScript file.
- * This script uses Vanilla JS to fetch word meanings, handle DOM elements,
- * toggle light/dark modes, and manage search history and favorites using localStorage.
- */
 
 // ==========================================
 // 1. DOM ELEMENT SELECTORS
@@ -59,7 +52,7 @@ const WOD_WORDS = ["eloquent", "serendipity", "resilient", "benevolent", "meticu
 function toggleTheme() {
     // Toggle class on the body element
     const isDarkMode = document.body.classList.toggle('dark-mode');
-    
+
     // Save selection in localStorage
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 }
@@ -71,7 +64,7 @@ function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     // Default to system preference if user hasn't set it explicitly
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         document.body.classList.add('dark-mode');
     } else {
@@ -89,24 +82,24 @@ function initTheme() {
  */
 async function searchWord(word) {
     if (!word || word.trim() === "") return;
-    
+
     const cleanWord = word.trim().toLowerCase();
-    
+
     // Update input field text
     searchInput.value = cleanWord;
     clearBtn.classList.remove('hidden');
-    
+
     // Prepare UI states
     welcomeCard.classList.add('hidden');
     resultCard.classList.add('hidden');
     errorCard.classList.add('hidden');
     loaderCard.classList.remove('hidden');
-    
+
     // Smooth scroll to search result on small devices
     if (window.innerWidth < 992) {
         loaderCard.scrollIntoView({ behavior: 'smooth' });
     }
-    
+
     // Fetch word details
     await fetchWordData(cleanWord);
 }
@@ -181,11 +174,8 @@ async function fetchWordData(word) {
     // IMPORTANT: This is OUTSIDE the fetch catch
     // ==========================================
     try {
-
         displayWordData(data);
-
     } catch (error) {
-
         console.error("DISPLAY ERROR:", error);
 
         showError(
@@ -201,14 +191,9 @@ async function fetchWordData(word) {
     // This should NOT be treated as a network error
     // ==========================================
     try {
-
         saveToHistory(cleanWord);
-
     } catch (error) {
-
         console.error("HISTORY ERROR:", error);
-
-        // Don't hide the dictionary result
         console.warn("Word was found successfully, but search history could not be saved.");
     }
 }
@@ -220,17 +205,17 @@ async function fetchWordData(word) {
 function displayWordData(data) {
     // Hide loader card
     loaderCard.classList.add('hidden');
-    
+
     const wordEntry = data[0];
     currentSearchedWord = wordEntry.word;
-    
+
     // Display word string
     resultWord.textContent = currentSearchedWord;
-    
+
     // Extract phonetic string safely (fallback through array)
     const phoneticText = wordEntry.phonetic || wordEntry.phonetics?.find(p => p.text)?.text || "";
     resultPhonetic.textContent = phoneticText;
-    
+
     // Extract audio pronunciation URL safely
     currentAudioUrl = null;
     if (wordEntry.phonetics && Array.isArray(wordEntry.phonetics)) {
@@ -240,20 +225,20 @@ function displayWordData(data) {
             currentAudioUrl = audioObj.audio;
         }
     }
-    
+
     // If audio is found, display play button, otherwise hide it
     if (currentAudioUrl) {
         playAudioBtn.classList.remove('hidden');
     } else {
         playAudioBtn.classList.add('hidden');
     }
-    
+
     // Update Favorited state on the button
     updateFavoriteButtonUI(currentSearchedWord);
-    
+
     // Renders definitions and meanings
     displayMeanings(wordEntry.meanings);
-    
+
     // Reveal result card
     resultCard.classList.remove('hidden');
 }
@@ -265,45 +250,45 @@ function displayWordData(data) {
 function displayMeanings(meanings) {
     // Clear previous results
     meaningsContainer.innerHTML = "";
-    
+
     if (!meanings || meanings.length === 0) {
         meaningsContainer.innerHTML = "<p class='empty-list-msg'>No definitions found for this word.</p>";
         return;
     }
-    
+
     // Loop through meanings (noun, verb, adjective, etc.)
     meanings.forEach(meaning => {
         const partOfSpeechBlock = document.createElement('div');
         partOfSpeechBlock.classList.add('part-of-speech-block');
-        
+
         // 1. Part of Speech Header
         const posHeader = document.createElement('div');
         posHeader.classList.add('pos-header');
-        
+
         const posTitle = document.createElement('h4');
         posTitle.classList.add('pos-title');
         posTitle.textContent = meaning.partOfSpeech;
-        
+
         const posLine = document.createElement('div');
         posLine.classList.add('pos-line');
-        
+
         posHeader.appendChild(posTitle);
         posHeader.appendChild(posLine);
         partOfSpeechBlock.appendChild(posHeader);
-        
+
         // 2. Definitions list
         const defsList = document.createElement('ul');
         defsList.classList.add('definitions-list');
-        
+
         meaning.definitions.forEach(def => {
             const defItem = document.createElement('li');
             defItem.classList.add('definition-item');
-            
+
             const defText = document.createElement('p');
             defText.classList.add('definition-text');
             defText.textContent = def.definition;
             defItem.appendChild(defText);
-            
+
             // Add example sentence if available
             if (def.example) {
                 const exampleText = document.createElement('span');
@@ -311,44 +296,44 @@ function displayMeanings(meanings) {
                 exampleText.textContent = `"${def.example}"`;
                 defItem.appendChild(exampleText);
             }
-            
+
             defsList.appendChild(defItem);
         });
-        
+
         partOfSpeechBlock.appendChild(defsList);
-        
+
         // Gather synonyms & antonyms for this specific part of speech
         // Note: API v2 might define them on meaning object, or on individual definitions.
         let allSynonyms = [...(meaning.synonyms || [])];
         let allAntonyms = [...(meaning.antonyms || [])];
-        
+
         meaning.definitions.forEach(def => {
             if (def.synonyms) allSynonyms.push(...def.synonyms);
             if (def.antonyms) allAntonyms.push(...def.antonyms);
         });
-        
+
         // Remove duplicates and trim strings
         allSynonyms = [...new Set(allSynonyms.map(s => s.trim()))].filter(s => s !== "");
         allAntonyms = [...new Set(allAntonyms.map(a => a.trim()))].filter(a => a !== "");
-        
+
         // 3. Render Synonyms & Antonyms
         if (allSynonyms.length > 0 || allAntonyms.length > 0) {
             const relationsBlock = document.createElement('div');
             relationsBlock.classList.add('vocab-relations');
-            
+
             if (allSynonyms.length > 0) {
                 const synGroup = displaySynonyms(allSynonyms);
                 relationsBlock.appendChild(synGroup);
             }
-            
+
             if (allAntonyms.length > 0) {
                 const antGroup = displayAntonyms(allAntonyms);
                 relationsBlock.appendChild(antGroup);
             }
-            
+
             partOfSpeechBlock.appendChild(relationsBlock);
         }
-        
+
         meaningsContainer.appendChild(partOfSpeechBlock);
     });
 }
@@ -361,24 +346,24 @@ function displayMeanings(meanings) {
 function displaySynonyms(synonyms) {
     const group = document.createElement('div');
     group.classList.add('relation-group');
-    
+
     const label = document.createElement('span');
     label.classList.add('relation-label');
     label.textContent = "Synonyms:";
     group.appendChild(label);
-    
+
     // Display maximum of 10 synonyms to keep layout clean
     synonyms.slice(0, 10).forEach(syn => {
         const btn = document.createElement('button');
         btn.type = "button";
         btn.classList.add('relation-tag');
         btn.textContent = syn;
-        
+
         // Search synonym word on click
         btn.addEventListener('click', () => searchWord(syn));
         group.appendChild(btn);
     });
-    
+
     return group;
 }
 
@@ -390,24 +375,24 @@ function displaySynonyms(synonyms) {
 function displayAntonyms(antonyms) {
     const group = document.createElement('div');
     group.classList.add('relation-group');
-    
+
     const label = document.createElement('span');
     label.classList.add('relation-label');
     label.textContent = "Antonyms:";
     group.appendChild(label);
-    
+
     // Display maximum of 10 antonyms to keep layout clean
     antonyms.slice(0, 10).forEach(ant => {
         const btn = document.createElement('button');
         btn.type = "button";
         btn.classList.add('relation-tag', 'antonym-tag');
         btn.textContent = ant;
-        
+
         // Search antonym word on click
         btn.addEventListener('click', () => searchWord(ant));
         group.appendChild(btn);
     });
-    
+
     return group;
 }
 
@@ -417,7 +402,7 @@ function displayAntonyms(antonyms) {
  */
 function playAudio(audioUrl) {
     if (!audioUrl) return;
-    
+
     try {
         const audio = new Audio(audioUrl);
         audio.play();
@@ -435,7 +420,7 @@ function playAudio(audioUrl) {
 function showError(title, body) {
     loaderCard.classList.add('hidden');
     resultCard.classList.add('hidden');
-    
+
     errorTitle.textContent = title;
     errorBody.textContent = body;
     errorCard.classList.remove('hidden');
@@ -452,24 +437,24 @@ function showError(title, body) {
  */
 function saveToHistory(word) {
     const cleanWord = word.trim().toLowerCase();
-    
+
     // Retrieve current history array from localStorage
     let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-    
+
     // Remove the word if it already exists to avoid duplicates
     history = history.filter(item => item !== cleanWord);
-    
+
     // Add the word to the beginning of the list
     history.unshift(cleanWord);
-    
+
     // Cut history list length to 5 entries
     if (history.length > 5) {
         history = history.slice(0, 5);
     }
-    
+
     // Store back into localStorage
     localStorage.setItem('searchHistory', JSON.stringify(history));
-    
+
     // Reload sidebar list
     loadHistory();
 }
@@ -479,24 +464,24 @@ function saveToHistory(word) {
  */
 function loadHistory() {
     const history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-    
+
     // Clear list
     historyList.innerHTML = "";
-    
+
     if (history.length === 0) {
         historyList.innerHTML = '<li class="empty-list-msg">No recent searches yet.</li>';
         return;
     }
-    
+
     history.forEach(word => {
         const li = document.createElement('li');
-        
+
         // Clicking the word button searches for it
         const wordBtn = document.createElement('button');
         wordBtn.classList.add('list-word-btn');
         wordBtn.textContent = word;
         wordBtn.addEventListener('click', () => searchWord(word));
-        
+
         // Remove button to clear item from list
         const removeBtn = document.createElement('button');
         removeBtn.classList.add('list-action-btn');
@@ -508,12 +493,12 @@ function loadHistory() {
                 <path d="m6 6 12 12"/>
             </svg>
         `;
-        
+
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Avoid triggering list item search click
             deleteFromHistory(word);
         });
-        
+
         li.appendChild(wordBtn);
         li.appendChild(removeBtn);
         historyList.appendChild(li);
@@ -541,9 +526,9 @@ function deleteFromHistory(word) {
  */
 function toggleFavoriteWord() {
     if (!currentSearchedWord) return;
-    
+
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    
+
     if (favorites.includes(currentSearchedWord)) {
         removeFavorite(currentSearchedWord);
     } else {
@@ -558,12 +543,12 @@ function toggleFavoriteWord() {
 function addFavorite(word) {
     const cleanWord = word.trim().toLowerCase();
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    
+
     if (!favorites.includes(cleanWord)) {
         favorites.push(cleanWord);
         localStorage.setItem('favorites', JSON.stringify(favorites));
     }
-    
+
     // Update elements
     updateFavoriteButtonUI(cleanWord);
     loadFavorites();
@@ -576,10 +561,10 @@ function addFavorite(word) {
 function removeFavorite(word) {
     const cleanWord = word.trim().toLowerCase();
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    
+
     favorites = favorites.filter(item => item !== cleanWord);
     localStorage.setItem('favorites', JSON.stringify(favorites));
-    
+
     // Update elements
     if (currentSearchedWord.toLowerCase() === cleanWord) {
         updateFavoriteButtonUI(currentSearchedWord);
@@ -595,7 +580,7 @@ function updateFavoriteButtonUI(word) {
     const cleanWord = word.trim().toLowerCase();
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     const isFavorited = favorites.includes(cleanWord);
-    
+
     if (isFavorited) {
         favoriteBtn.classList.add('favorited');
         starOutlineIcon.classList.add('hidden');
@@ -614,23 +599,23 @@ function updateFavoriteButtonUI(word) {
  */
 function loadFavorites() {
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    
+
     favoritesList.innerHTML = "";
-    
+
     if (favorites.length === 0) {
         favoritesList.innerHTML = '<li class="empty-list-msg">No favorite words saved yet.</li>';
         return;
     }
-    
+
     favorites.forEach(word => {
         const li = document.createElement('li');
-        
+
         // Word search action button
         const wordBtn = document.createElement('button');
         wordBtn.classList.add('list-word-btn');
         wordBtn.textContent = word;
         wordBtn.addEventListener('click', () => searchWord(word));
-        
+
         // Remove button
         const removeBtn = document.createElement('button');
         removeBtn.classList.add('list-action-btn');
@@ -642,12 +627,12 @@ function loadFavorites() {
                 <path d="m6 6 12 12"/>
             </svg>
         `;
-        
+
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Avoid triggering list item search click
             removeFavorite(word);
         });
-        
+
         li.appendChild(wordBtn);
         li.appendChild(removeBtn);
         favoritesList.appendChild(li);
@@ -665,43 +650,43 @@ function loadFavorites() {
 async function initWordOfDay() {
     wodLoading.classList.remove('hidden');
     wodDisplay.classList.add('hidden');
-    
+
     // 1. Pick random word
     const randomIndex = Math.floor(Math.random() * WOD_WORDS.length);
     const selectedWod = WOD_WORDS[randomIndex];
-    
+
     try {
         const apiURL = `https://api.dictionaryapi.dev/api/v2/entries/en/${selectedWod}`;
         const response = await fetch(apiURL);
-        
+
         if (!response.ok) {
             throw new Error(`WOD fetch failed with status ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // 2. Extract first definition safely
         const firstMeaning = data[0]?.meanings?.[0];
         const firstDef = firstMeaning?.definitions?.[0]?.definition || "Meaning preview unavailable.";
         const partOfSpeech = firstMeaning?.partOfSpeech ? ` (${firstMeaning.partOfSpeech})` : "";
-        
+
         // 3. Render details
         wodWord.textContent = selectedWod;
         wodMeaning.textContent = `${partOfSpeech} ${firstDef}`;
-        
+
         // 4. Attach click listener to search WOD in main view
         // We recreate the listener or clear existing ones by copying the node
         const newBtn = wodSearchBtn.cloneNode(true);
         wodSearchBtn.parentNode.replaceChild(newBtn, wodSearchBtn);
         newBtn.addEventListener('click', () => searchWord(selectedWod));
-        
+
         // Hide loader & show result
         wodLoading.classList.add('hidden');
         wodDisplay.classList.remove('hidden');
-        
+
     } catch (error) {
         console.error("Error setting up Word of the Day:", error);
-        
+
         // Fallback local dictionary details in case of network unavailability during load
         const fallbackMeanings = {
             "eloquent": "(adjective) Fluent or persuasive in speaking or writing.",
@@ -710,15 +695,15 @@ async function initWordOfDay() {
             "benevolent": "(adjective) Well meaning and kindly; charitable.",
             "meticulous": "(adjective) Showing great attention to detail; very careful and precise."
         };
-        
+
         wodWord.textContent = selectedWod;
         wodMeaning.textContent = fallbackMeanings[selectedWod] || "Able to recover quickly from difficulties.";
-        
+
         // Setup fallback action search button
         const newBtn = wodSearchBtn.cloneNode(true);
         wodSearchBtn.parentNode.replaceChild(newBtn, wodSearchBtn);
         newBtn.addEventListener('click', () => searchWord(selectedWod));
-        
+
         wodLoading.classList.add('hidden');
         wodDisplay.classList.remove('hidden');
     }
